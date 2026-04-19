@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   return (
-    <div className='p-8 flex gap-8 h-full flex-col md:flex-row'>
+    <div className='p-8 flex gap-8 h-full flex-col md:flex-row bg-secondary'>
       <div className='basis-xl flex flex-col justify-center gap-4 max-md:flex-1'>
         <h1 className='text-3xl text-primary font-semibold'>dvobdt</h1>
         <div className='border rounded-md border-primary p-4 space-y-4'>
