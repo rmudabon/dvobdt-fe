@@ -24,9 +24,7 @@ const PinMap = () => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-full">
-                <svg className="animate-spin h-8 w-8 text-teal-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-
-                </svg>
+                <svg className="animate-spin h-8 w-8 text-teal-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" />
             </div>
         )
     }
