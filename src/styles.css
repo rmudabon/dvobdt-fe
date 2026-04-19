@@ -9,7 +9,7 @@ body {
 
 @theme {
   --font-display: "Outfit", sans-serif;
-  
+  --color-primary: oklch(50.8% 0.118 165.612);
 }
 
 html, body, #app {
