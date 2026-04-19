@@ -1,10 +1,12 @@
 import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
-import { Home, Menu, X } from 'lucide-react'
+import { useUser } from '../hooks/useAuth'
+import { Home, Menu, Upload, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const user = useUser()
 
   return (
     <>
@@ -57,9 +59,49 @@ export default function Header() {
             <span className="font-medium">Home</span>
           </Link>
 
-          {/* Demo Links Start */}
+          <div className="mt-4 p-3">
+            {/* Simple auth links */}
+            {(() => {
+              if (user?.data) {
+                return (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm">Signed in as</span>
+                    <span className="font-semibold">{user.data.username}</span>
+                    <Link
+                      to="/logout"
+                      onClick={() => setIsOpen(false)}
+                      className="text-red-400 hover:underline"
+                    >
+                      Logout
+                    </Link>
+                  </div>
+                )
+              }
 
-          {/* Demo Links End */}
+              return (
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="text-cyan-400 hover:underline"
+                >
+                  Login
+                </Link>
+              )
+            })()}
+          </div>
+
+          <Link
+            to="/upload"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
+            }}
+          >
+            <Upload size={20} />
+            <span className="font-medium">Upload</span>
+          </Link>
         </nav>
       </aside>
     </>

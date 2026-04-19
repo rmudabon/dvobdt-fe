@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 body {
@@ -9,7 +10,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+@theme {
+  --font-display: "Outfit", sans-serif;
+  
+}
+
+html, body, #app {
+  @apply h-full font-display;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
 }
