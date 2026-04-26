@@ -806,6 +806,11 @@
   resolved "https://registry.yarnpkg.com/@tanstack/devtools-event-client/-/devtools-event-client-0.4.3.tgz#bfa2e68f5e06a8bb8934c7bd96912adf2d96571d"
   integrity sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==
 
+"@tanstack/devtools-event-client@^0.4.1":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/devtools-event-client/-/devtools-event-client-0.4.3.tgz#bfa2e68f5e06a8bb8934c7bd96912adf2d96571d"
+  integrity sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==
+
 "@tanstack/devtools-ui@0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@tanstack/devtools-ui/-/devtools-ui-0.4.4.tgz#00c08ab493b849385d8474e9165c73bd955fe1b1"
@@ -846,10 +851,10 @@
     goober "^2.1.16"
     solid-js "^1.9.9"
 
-"@tanstack/form-core@1.29.0":
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/form-core/-/form-core-1.29.0.tgz#b08a07249069a0f40f74e7054cee323f71879e55"
-  integrity sha512-uyeKEdJBfbj0bkBSwvSYVRtWLOaXvfNX3CeVw1HqGOXVLxpBBGAqWdYLc+UoX/9xcoFwFXrjR9QqMPzvwm2yyQ==
+"@tanstack/form-core@1.29.1":
+  version "1.29.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/form-core/-/form-core-1.29.1.tgz#2703b903272ddf6fcf1667226ed86f74293f3dc0"
+  integrity sha512-NIYPO36eEu7nSWvMpbFDQaBWyVtnH/C8fsZ3/XpJUT4uOWgmxsiUvHGbTbDNIQTXAKIkhwEl0sUrqBNn2SfUnw==
   dependencies:
     "@tanstack/devtools-event-client" "^0.4.1"
     "@tanstack/pacer-lite" "^0.1.1"
@@ -877,12 +882,12 @@
   dependencies:
     "@tanstack/devtools" "0.7.0"
 
-"@tanstack/react-form@^1.29.0":
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-form/-/react-form-1.29.0.tgz#2fc7bb5ef1c92d3c1efb0ade2d432f56e429d487"
-  integrity sha512-jj425NNX0QKqbUzqSNiYI3HCPHSk2df47acXCJyXczWOTmG81ECZGkgofgqamFsSU9kMiH6Di5RLUnftrlhWSw==
+"@tanstack/react-form@^1.29.1":
+  version "1.29.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-form/-/react-form-1.29.1.tgz#80644619b7347057c999e0180e973532cdde2246"
+  integrity sha512-hVHk4g0phd0HxRsv2ry6Xt8BqmalT55Q3cokhJBCC1St0hcGZhgwJJbohm9atao45BPG9e55DGvtbwExqZe35g==
   dependencies:
-    "@tanstack/form-core" "1.29.0"
+    "@tanstack/form-core" "1.29.1"
     "@tanstack/react-store" "^0.9.1"
 
 "@tanstack/react-query@^5.90.16":
