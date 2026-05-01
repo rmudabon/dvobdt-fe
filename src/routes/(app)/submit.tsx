@@ -1,48 +1,48 @@
 import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import z from "zod";
+import { createLocation, locationSchema, stallOptionSchema } from "@/services/locations";
+import type { LocationFormData } from "@/services/locations";
 
 export const Route = createFileRoute('/(app)/submit')({
     component: LocationForm,
 })
 
-const stallOptionSchema = z.enum(["M", "F", "U"])
 
-const locationSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    address: z.string().min(1, "Address is required"),
-    latitude: z.number().refine((val) => val >= -90 && val <= 90, "Latitude must be between -90 and 90"),
-    longitude: z.number().refine((val) => val >= -180 && val <= 180, "Longitude must be between -180 and 180"),
-    stall: z.enum(["M", "F", "U"], { message: "Stall must be 'Male', 'Female', or 'Unisex'" }),
-    description: z.string().optional(),
-    imageUrl: z.string().optional()
-})
-
-type LocationFormData = z.infer<typeof locationSchema>
 const defaultValues: LocationFormData = {
     name: "",
     address: "",
-    latitude: 0,
-    longitude: 0,
+    latitude: 7.091211485871758,
+    longitude: 125.61130784227682,
     stall: "U",
     description: "",
     imageUrl: ""
 }
 
 function LocationForm() {
+    const submitLocation = useMutation({
+        mutationFn: createLocation,
+        onSuccess(data) {
+            console.log("Location created successfully", data)
+            form.reset()
+        },
+        onError(error) {
+            console.error("Error creating location", error)
+        }
+    })
+
     const form = useForm({
         defaultValues,
         validators: {
-            onChange: locationSchema,
-            onBlur: locationSchema
+            onSubmit: locationSchema,
         },
-        onSubmit: (values) => {
-            console.log(values)
-        },
-        onSubmitInvalid(props) {
-            console.log("Form is invalid", props.formApi.getAllErrors())
-        },
+        onSubmit: async ({ formApi, value }) => {
+            await submitLocation.mutateAsync(value)
+            formApi.reset()
+        }
     })
+
+    
 
     return (
         <div className="container mx-auto h-full flex flex-col items-center justify-center">
@@ -66,7 +66,7 @@ function LocationForm() {
                                 onChange={e => field.handleChange(e.target.value)}
                                 className="border border-teal-700 rounded-md p-2"
                             />
-                            {!field.state.meta.isValid && <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>}
+                            <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
                         </div>
                     )}
                 </form.Field>
@@ -82,7 +82,7 @@ function LocationForm() {
                                 onChange={e => field.handleChange(e.target.value)}
                                 className="border border-teal-700 rounded-md p-2"
                             />
-                            {!field.state.meta.isValid && <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>}
+                            <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
                         </div>
                     )}
                 </form.Field>
@@ -100,7 +100,7 @@ function LocationForm() {
                                 placeholder="Add other information here..."
                                 rows={4}
                             />
-                            {!field.state.meta.isValid && <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>}
+                            <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
                         </div>
                     )}
                 </form.Field>
@@ -124,7 +124,7 @@ function LocationForm() {
                                 <option value="F">Female</option> 
                                 <option value="U">Unisex</option>
                             </select>
-                            {!field.state.meta.isValid && <p className="text-red-500">{field.state.meta.errors.join(', ')}</p>}
+                            <p className="text-red-500">{field.state.meta.errors.join(', ')}</p>
                         </div>
                     )}
                 </form.Field>
