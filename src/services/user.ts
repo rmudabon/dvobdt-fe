@@ -1,6 +1,31 @@
-import { API_URL } from "@/utils/constants"
+import { API_URL } from "@/utils/constants";
+import z from "zod";
 
-export type User = { username: string }
+export const userSchema = z.object({
+    email: z.email("Invalid email address").min(1, "Email is required"),
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(6, "Password must be at least 6 characters long")
+});
+export const loginSchema = userSchema.pick({ username: true, password: true });
+export type UserRegistrationData = z.infer<typeof userSchema>;
+export type UserLoginData = z.infer<typeof loginSchema>;
+
+const userInfoSchema = userSchema.pick({ username: true})
+type User = z.infer<typeof userInfoSchema>
+
+export const register = (data: UserRegistrationData) =>
+    fetch(`${API_URL}/users/register/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => {
+        if (!res.ok) throw res
+        return res.json()
+    })
+    .catch(res => console.error(res))
 
 export function getCookie(name: string) {
     let cookieValue = null;
@@ -18,8 +43,8 @@ export function getCookie(name: string) {
     return cookieValue;
 }
 
-export async function loginApi({ username, password }: { username: string; password: string }) {
-  const res = await fetch(`${API_URL}/login/`, {
+export async function login({ username, password }: { username: string; password: string }) {
+  const res = await fetch(`${API_URL}/users/login/`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -37,9 +62,9 @@ export async function loginApi({ username, password }: { username: string; passw
   return data
 }
 
-export async function logoutApi() {
+export async function logout() {
   const csrftoken = getCookie('csrftoken');
-  await fetch(`${API_URL}/logout/`, {
+  await fetch(`${API_URL}/users/logout/`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -52,16 +77,8 @@ export async function logoutApi() {
   return true
 }
 
-export async function getLocations() {
-  const res = await fetch(`${API_URL}/locations/`, {
-    credentials: 'include',
-  })
-
-  console.log(res)
-}
-
 export async function getCurrentUser(): Promise<User | null> {
-  const res = await fetch(`${API_URL}/user/`, {
+  const res = await fetch(`${API_URL}/users/me/`, {
     credentials: 'include',
   })
 
@@ -73,6 +90,11 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 
   const user = await res.json()
-  localStorage.setItem('auth_user', JSON.stringify(user))
-  return user as User
+  const parsed = userInfoSchema.safeParse(user)
+  if (!parsed.success) {
+    console.error('Invalid user data:', parsed.error)
+    return null
+  }
+  localStorage.setItem('auth_user', JSON.stringify(parsed.data))
+  return parsed.data
 }

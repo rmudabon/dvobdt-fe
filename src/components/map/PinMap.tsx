@@ -19,7 +19,7 @@ const CUSTOM_MARKER_ICON = new L.Icon({
 })
 
 const PinMap = () => {
-    const { isLoading, error } = useLocations()
+    const { data, isLoading, error } = useLocations()
 
     if (isLoading) {
         return (
@@ -37,6 +37,14 @@ const PinMap = () => {
         )
     }
 
+    if(!data || data.length === 0) {
+        return (
+            <div className="flex justify-center items-center h-full rounded-md bg-neutral-200">
+                <p>No bidets found. Be the first to add one!</p>
+            </div>
+        )
+    }
+
     return (
         <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
             <TileLayer
@@ -44,11 +52,20 @@ const PinMap = () => {
                 attribution='© OpenStreetMap contributors, © CartoDB'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
             />
-            <Marker position={DAVAO_CITY_COORDS} icon={CUSTOM_MARKER_ICON}>
-                <Popup>
-                    Test Davao
-                </Popup>
-            </Marker>
+            {data.map(location => (
+                <Marker
+                    key={location.name}
+                    position={[location.lat, location.lng]}
+                    icon={CUSTOM_MARKER_ICON}
+                >
+                    <Popup>
+                        <h3 className="text-lg font-semibold">{location.name}</h3>
+                        <p>{location.address}</p>
+                        <p>Stall Type: {location.stall_type}</p>
+                        <p>{location.description}</p>
+                    </Popup>
+                </Marker>
+            ))}
         </MapContainer>
     )
 }

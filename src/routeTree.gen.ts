@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as appSubmitRouteImport } from './routes/(app)/submit'
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogoutRoute = LogoutRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
 }
@@ -60,21 +68,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/(app)/submit': typeof appSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/logout' | '/upload' | '/submit'
+  fullPaths: '/' | '/login' | '/logout' | '/register' | '/upload' | '/submit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/logout' | '/upload' | '/submit'
-  id: '__root__' | '/' | '/login' | '/logout' | '/upload' | '/(app)/submit'
+  to: '/' | '/login' | '/logout' | '/register' | '/upload' | '/submit'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/logout'
+    | '/register'
+    | '/upload'
+    | '/(app)/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  RegisterRoute: typeof RegisterRoute
   UploadRoute: typeof UploadRoute
   appSubmitRoute: typeof appSubmitRoute
 }
@@ -86,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
@@ -123,6 +147,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  RegisterRoute: RegisterRoute,
   UploadRoute: UploadRoute,
   appSubmitRoute: appSubmitRoute,
 }

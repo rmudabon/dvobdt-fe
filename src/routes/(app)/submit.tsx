@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { createLocation, locationSchema, stallOptionSchema } from "@/services/locations";
+import { createLocation, locationFormSchema, stallOptionSchema } from "@/services/locations";
 import type { LocationFormData } from "@/services/locations";
 
 export const Route = createFileRoute('/(app)/submit')({
@@ -12,8 +12,8 @@ export const Route = createFileRoute('/(app)/submit')({
 const defaultValues: LocationFormData = {
     name: "",
     address: "",
-    latitude: 7.091211485871758,
-    longitude: 125.61130784227682,
+    latitude: 7.091217,
+    longitude: 125.61138,
     stall: "U",
     description: "",
     imageUrl: ""
@@ -34,7 +34,7 @@ function LocationForm() {
     const form = useForm({
         defaultValues,
         validators: {
-            onSubmit: locationSchema,
+            onSubmit: locationFormSchema,
         },
         onSubmit: async ({ formApi, value }) => {
             await submitLocation.mutateAsync(value)

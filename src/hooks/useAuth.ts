@@ -1,18 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import * as auth from '../lib/auth'
+import { login, logout, getCurrentUser } from '@/services/user'
 
 export function useUser() {
-  // Fetch current user from the backend `/me` endpoint (uses stored token)
   return useQuery({
     queryKey: ['user'],
-    queryFn: auth.getCurrentUser
+    queryFn: getCurrentUser,
   })
 }
 
 export function useLogin() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: auth.loginApi,
+    mutationFn: login,
     onSuccess: (data) => {
       qc.setQueryData(['user'], data.user)
     },
@@ -22,7 +21,7 @@ export function useLogin() {
 export function useLogout() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: auth.logoutApi,
+    mutationFn: logout,
     onSuccess: () => {
       qc.setQueryData(['user'], null)
     },

@@ -1,1 +1,1 @@
-export const API_URL = 'https://dvobdt.com/api'
+export const API_URL = `http://${import.meta.env.VITE_BASE_API_URL}/api`
