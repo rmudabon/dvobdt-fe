@@ -1,13 +1,7 @@
 import { useLocations } from "@/hooks/useLocations";
-import type { LatLngBoundsLiteral, LatLngExpression } from "leaflet"
+import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
 import L from "leaflet"
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
-
-const DAVAO_CITY_COORDS: LatLngExpression = [7.0667, 125.6]
-const BOUNDS: LatLngBoundsLiteral = [
-  [7.493196470122287, 125.89645385742189],
-  [6.767579526961214, 125.07797241210939],
-];
 
 const CUSTOM_MARKER_ICON = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',

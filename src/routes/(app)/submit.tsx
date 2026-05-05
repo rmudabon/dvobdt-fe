@@ -1,13 +1,14 @@
-import { useForm } from "@tanstack/react-form";
+import { useForm, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createLocation, locationFormSchema, stallOptionSchema } from "@/services/locations";
 import type { LocationFormData } from "@/services/locations";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
+import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
 
 export const Route = createFileRoute('/(app)/submit')({
     component: LocationForm,
 })
-
 
 const defaultValues: LocationFormData = {
     name: "",
@@ -19,18 +20,7 @@ const defaultValues: LocationFormData = {
     imageUrl: ""
 }
 
-function LocationForm() {
-    const submitLocation = useMutation({
-        mutationFn: createLocation,
-        onSuccess(data) {
-            console.log("Location created successfully", data)
-            form.reset()
-        },
-        onError(error) {
-            console.error("Error creating location", error)
-        }
-    })
-
+const useLocationForm = () => {
     const form = useForm({
         defaultValues,
         validators: {
@@ -42,8 +32,42 @@ function LocationForm() {
         }
     })
 
-    
+    const submitLocation = useMutation({
+        mutationFn: createLocation,
+        onSuccess(data) {
+            console.log("Location created successfully", data)
+            form.reset()
+        },
+        onError(error) {
+            console.error("Error creating location", error)
+        }
+    })
+    return form
+}
 
+function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) {
+    const longitude = useStore(form.store, (state) => state.values.longitude)
+    const latitude = useStore(form.store, (state) => state.values.latitude)
+    const map = useMapEvents({
+        click(event) {
+            map.flyTo(event.latlng, map.getZoom())
+            form.setFieldValue('latitude', event.latlng.lat)
+            form.setFieldValue('longitude', event.latlng.lng)
+        }
+    })
+
+    if (!latitude || !longitude) return null
+    return (
+        <Marker position={[latitude, longitude]}>
+            <Popup>
+                Selected Location: {latitude.toFixed(5)}, {longitude.toFixed(5)}
+            </Popup>
+        </Marker>
+    )
+}
+
+function LocationForm() {
+    const form = useLocationForm()
     return (
         <div className="container mx-auto h-full flex flex-col items-center justify-center">
             <h1 className="text-2xl font-bold">Add New Bidet</h1>
@@ -86,6 +110,14 @@ function LocationForm() {
                         </div>
                     )}
                 </form.Field>
+                <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
+                    <TileLayer
+                        bounds={BOUNDS}
+                        attribution='© OpenStreetMap contributors, © CartoDB'
+                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+                    />
+                    <LocationMarker form={form} />
+                </MapContainer>
                 <form.Field
                     name='description'
                 >
