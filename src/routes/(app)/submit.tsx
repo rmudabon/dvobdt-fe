@@ -5,6 +5,12 @@ import { createLocation, locationFormSchema, stallOptionSchema } from "@/service
 import type { LocationFormData } from "@/services/locations";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Field, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { LocateFixed } from "lucide-react";
 
 export const Route = createFileRoute('/(app)/submit')({
     component: LocationForm,
@@ -68,63 +74,80 @@ function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) 
 
 function LocationForm() {
     const form = useLocationForm()
+
+    const getCurrentLocation = () => {
+        if(!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser")
+        }
+        navigator.geolocation.getCurrentPosition((position) => {
+            form.setFieldValue('latitude', position.coords.latitude)
+            form.setFieldValue('longitude', position.coords.longitude)
+        })
+    }
+
     return (
-        <div className="container mx-auto h-full flex flex-col items-center justify-center">
-            <h1 className="text-2xl font-bold">Add New Bidet</h1>
+        <div className="container mx-auto flex justify-center p-8">
             <form 
                 onSubmit={(e) => {
                     e.preventDefault()
                     form.handleSubmit()
                 }}
-                className="space-y-8 w-full max-w-lg p-8"
+                className="space-y-4 w-full max-w-xl"
             >
+                <FieldLegend className="font-bold">New Bidet</FieldLegend>
                 <form.Field
                     name="name"
                 >
                     {(field) => (
-                        <div className="flex flex-col">
-                            <label htmlFor={field.name} className="text-xl font-semibold mb-2">Name</label>
-                            <input
+                        <Field className="flex flex-col">
+                            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                            <Input
                                 id={field.name}
                                 value={field.state.value}
                                 onChange={e => field.handleChange(e.target.value)}
                                 className="border border-teal-700 rounded-md p-2"
                             />
                             <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
-                        </div>
+                        </Field>
                     )}
                 </form.Field>
                 <form.Field
                     name="address"
                 >
                     {(field) => (
-                        <div className="flex flex-col">
-                            <label htmlFor={field.name} className="text-xl font-semibold mb-2">Address</label>
-                            <input
+                        <Field className="flex flex-col">
+                            <FieldLabel htmlFor={field.name}>Address</FieldLabel>
+                            <Input
                                 id={field.name}
                                 value={field.state.value}
                                 onChange={e => field.handleChange(e.target.value)}
                                 className="border border-teal-700 rounded-md p-2"
                             />
                             <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
-                        </div>
+                            <Button type='button' variant='outline' className="cursor-pointer" onClick={getCurrentLocation}>
+                                <LocateFixed />
+                                Use Current Location
+                            </Button>
+                        </Field>
                     )}
                 </form.Field>
+                <div className="h-80">
                 <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
                     <TileLayer
                         bounds={BOUNDS}
-                        attribution='© OpenStreetMap contributors, © CartoDB'
-                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+                        attribution='© OpenStreetMap contributors, © Stadia Maps'
+                        url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
                     />
                     <LocationMarker form={form} />
                 </MapContainer>
+                </div>
                 <form.Field
                     name='description'
                 >
                     {(field) => (
-                        <div className="flex flex-col">
-                            <label htmlFor={field.name} className="text-xl font-semibold mb-2">Description</label>
-                            <textarea
+                        <Field className="flex flex-col">
+                            <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                            <Textarea
                                 id={field.name}
                                 value={field.state.value}
                                 onChange={e => field.handleChange(e.target.value)}
@@ -133,44 +156,52 @@ function LocationForm() {
                                 rows={4}
                             />
                             <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
-                        </div>
+                        </Field>
                     )}
                 </form.Field>
                 <form.Field
                     name='stall'
                 >
                     {(field) => (
-                        <div className="flex flex-col">
-                            <label htmlFor={field.name} className="text-xl font-semibold mb-2">Stall Type</label>
-                            <select
-                                id={field.name}
-                                value={field.state.value}
-                                onChange={e => {
-                                    const value = e.target.value;
-                                    const parsedValue = stallOptionSchema.parse(value);
-                                    field.handleChange(parsedValue)
+                        <FieldSet className="">
+                            <FieldLegend variant="label">Stall Type</FieldLegend>
+                            <RadioGroup 
+                                onValueChange={(value) => {
+                                    const parsed = stallOptionSchema.safeParse(value)
+                                    if (parsed.success) {
+                                        field.handleChange(parsed.data)
+                                    }
                                 }}
-                                className="border border-teal-700 rounded-md p-2"
+                                defaultValue={field.state.value}
                             >
-                                <option value="M">Male</option>
-                                <option value="F">Female</option> 
-                                <option value="U">Unisex</option>
-                            </select>
-                            <p className="text-red-500">{field.state.meta.errors.join(', ')}</p>
-                        </div>
+                                <Field orientation="horizontal">
+                                    <RadioGroupItem value="M" id="stall-m" />
+                                    <FieldLabel htmlFor="stall-m">Male</FieldLabel>
+                                </Field>
+                                <Field orientation="horizontal">
+                                    <RadioGroupItem value="F" id="stall-f" />
+                                    <FieldLabel htmlFor="stall-f">Female</FieldLabel>
+                                </Field>
+                                <Field orientation="horizontal">
+                                    <RadioGroupItem value="U" id="stall-u" />
+                                    <FieldLabel htmlFor="stall-u">Unisex</FieldLabel>
+                                </Field>
+                            </RadioGroup>
+                        </FieldSet>
                     )}
                 </form.Field>
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting, state.isPristine]}
                     children={([canSubmit, isSubmitting, isPristine]) => (
-                        <button
+                        <Button
                             type="submit"
                             role="button"
-                            className="cursor-pointer bg-teal-700 text-white px-4 py-2 rounded-md hover:bg-teal-800 transition-colors"
+                            size='lg'
+                            className="w-full"
                             disabled={!canSubmit || isSubmitting || isPristine}
                         >
                             Submit
-                        </button>
+                        </Button>
                     )}
                 />
             </form>
