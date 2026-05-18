@@ -6,7 +6,7 @@ import { createLocation, fetchGeolocationAutocomplete, locationFormSchema, stall
 import { toast } from "sonner";
 import type { GeolocationAutocompleteItem, LocationFormData } from "@/services/locations";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
-import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
+import { BOUNDS, DAVAO_CITY_CENTER, DAVAO_CITY_COORDS } from "@/utils/constants";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
@@ -23,8 +23,8 @@ export const Route = createFileRoute('/(app)/submit')({
 const defaultValues: LocationFormData = {
     name: "",
     address: "",
-    latitude: 7.091217,
-    longitude: 125.61138,
+    latitude: DAVAO_CITY_CENTER[0],
+    longitude: DAVAO_CITY_CENTER[1],
     stall: "U",
     description: "",
     imageUrl: ""
@@ -109,12 +109,6 @@ function LocationForm() {
         })
     }
 
-    useEffect(() => {
-        if (hasRequestedLocation.current) return
-        hasRequestedLocation.current = true
-        getCurrentLocation()
-    }, [])
-
     const handleAddressInputChange = (value: string) => {
         form.setFieldValue("address", value)
 
@@ -130,6 +124,10 @@ function LocationForm() {
     }
 
     useEffect(() => {
+        if (hasRequestedLocation.current) return
+        hasRequestedLocation.current = true
+        getCurrentLocation()
+
         return () => {
             debouncedFetchSuggestionsRef.current.cancel()
         }
@@ -144,13 +142,15 @@ function LocationForm() {
                 }}
                 className="space-y-4 w-full max-w-xl"
             >
-                <FieldLegend className="font-bold">New Bidet</FieldLegend>
+                <FieldLegend className="font-bold text-2xl!">New Bidet</FieldLegend>
                 <form.Field
                     name="name"
                 >
                     {(field) => (
                         <Field className="flex flex-col">
-                            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                            <FieldLabel htmlFor={field.name}>
+                                Name <span className="text-red-500" aria-hidden="true">*</span>
+                            </FieldLabel>
                             <Input
                                 id={field.name}
                                 value={field.state.value}
@@ -166,7 +166,9 @@ function LocationForm() {
                 >
                     {(field) => (
                         <Field className="flex flex-col">
-                            <FieldLabel htmlFor={field.name}>Address</FieldLabel>
+                            <FieldLabel htmlFor={field.name}>
+                                Address <span className="text-red-500" aria-hidden="true">*</span>
+                            </FieldLabel>
                             <Combobox
                                 value={field.state.value}
                                 inputValue={field.state.value}
@@ -250,7 +252,9 @@ function LocationForm() {
                 >
                     {(field) => (
                         <FieldSet className="">
-                            <FieldLegend variant="label">Stall Type</FieldLegend>
+                            <FieldLegend variant="label">
+                                Stall Type <span className="text-red-500" aria-hidden="true">*</span>
+                            </FieldLegend>
                             <RadioGroup 
                                 onValueChange={(value) => {
                                     const parsed = stallOptionSchema.safeParse(value)

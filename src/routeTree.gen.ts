@@ -14,6 +14,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BidetsBidetIdRouteImport } from './routes/bidets/$bidetId'
 import { Route as appSubmitRouteImport } from './routes/(app)/submit'
 
 const UploadRoute = UploadRouteImport.update({
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BidetsBidetIdRoute = BidetsBidetIdRouteImport.update({
+  id: '/bidets/$bidetId',
+  path: '/bidets/$bidetId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appSubmitRoute = appSubmitRouteImport.update({
   id: '/(app)/submit',
   path: '/submit',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
+  '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
+  '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +79,27 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/upload': typeof UploadRoute
   '/(app)/submit': typeof appSubmitRoute
+  '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/logout' | '/register' | '/upload' | '/submit'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/logout'
+    | '/register'
+    | '/upload'
+    | '/submit'
+    | '/bidets/$bidetId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/logout' | '/register' | '/upload' | '/submit'
+  to:
+    | '/'
+    | '/login'
+    | '/logout'
+    | '/register'
+    | '/upload'
+    | '/submit'
+    | '/bidets/$bidetId'
   id:
     | '__root__'
     | '/'
@@ -85,6 +108,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/upload'
     | '/(app)/submit'
+    | '/bidets/$bidetId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +118,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   UploadRoute: typeof UploadRoute
   appSubmitRoute: typeof appSubmitRoute
+  BidetsBidetIdRoute: typeof BidetsBidetIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -133,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bidets/$bidetId': {
+      id: '/bidets/$bidetId'
+      path: '/bidets/$bidetId'
+      fullPath: '/bidets/$bidetId'
+      preLoaderRoute: typeof BidetsBidetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/submit': {
       id: '/(app)/submit'
       path: '/submit'
@@ -150,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   UploadRoute: UploadRoute,
   appSubmitRoute: appSubmitRoute,
+  BidetsBidetIdRoute: BidetsBidetIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,6 +5,7 @@ import { getCookie } from "./user"
 export const stallOptionSchema = z.enum(["M", "F", "U"])
 
 export const locationSchema = z.object({
+    id: z.number(),
     name: z.string().min(1, "Name is required"),
     address: z.string().min(1, "Address is required"),
     lat: z.number().refine((val) => val >= -90 && val <= 90, "Latitude must be between -90 and 90"),
@@ -39,25 +40,24 @@ export type GeolocationAutocompleteItem = z.infer<typeof geolocationAutocomplete
 
 export const fetchLocations = async () => {
     const csrftoken = getCookie('csrftoken');
-    return fetch(`${API_URL}/locations/`, {
+    const res = await fetch(`${API_URL}/locations/`, {
         credentials: 'include',
         headers: {
             "X-CSRFToken": csrftoken ?? '',
         },
     })
-        .then(async res => {
-            if (!res.ok) throw res
-            const data = await res.json()
-            console.log(data)
-            const parsedData = locationSchema.array().safeParse(data)
-            if (!parsedData.success) {
-                console.error("Failed to parse locations data", parsedData.error)
-                throw new Error("Failed to parse locations data")
-            }
-            return parsedData.data
-        })
-        .catch(res => console.error(res))
+
+    if (!res.ok) throw res
+
+    const data = await res.json()
+    const parsedData = locationSchema.array().safeParse(data)
+
+    if (!parsedData.success) {
+        throw new Error("Failed to parse locations data")
     }
+
+    return parsedData.data
+}
 
 export const createLocation = async (data: LocationFormData) => {
     const csrftoken = getCookie('csrftoken');
