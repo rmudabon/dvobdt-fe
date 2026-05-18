@@ -133,7 +133,7 @@
     }
 
     body, #app {
-        @apply min-h-full font-display;
+        @apply h-full overflow-auto font-display;
     }
 
     .leaflet-container {

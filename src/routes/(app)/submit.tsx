@@ -5,8 +5,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createLocation, fetchGeolocationAutocomplete, locationFormSchema, stallOptionSchema } from "@/services/locations";
 import { toast } from "sonner";
 import type { GeolocationAutocompleteItem, LocationFormData } from "@/services/locations";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
-import { BOUNDS, DAVAO_CITY_CENTER, DAVAO_CITY_COORDS } from "@/utils/constants";
+import { MapContainer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { BOUNDS, CUSTOM_MARKER_ICON, DAVAO_CITY_CENTER, DAVAO_CITY_COORDS } from "@/utils/constants";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LocateFixed } from "lucide-react";
 import { debounce } from "@/lib/utils";
+import { CustomTileLayer } from "@/components/map/CustomTileLayer";
 
 export const Route = createFileRoute('/(app)/submit')({
     component: LocationForm,
@@ -70,7 +71,7 @@ function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) 
 
     if (!latitude || !longitude) return null
     return (
-        <Marker position={[latitude, longitude]}>
+        <Marker position={[latitude, longitude]} icon={CUSTOM_MARKER_ICON}>
             <Popup>
                 Selected Location: {latitude.toFixed(5)}, {longitude.toFixed(5)}
             </Popup>
@@ -220,12 +221,8 @@ function LocationForm() {
                     )}
                 </form.Field>
                 <div className="h-80 relative z-0">
-                <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
-                    <TileLayer
-                        bounds={BOUNDS}
-                        attribution='© OpenStreetMap contributors, © Stadia Maps'
-                        url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
-                    />
+                <MapContainer center={DAVAO_CITY_COORDS} zoom={17} maxBounds={BOUNDS}>
+                    <CustomTileLayer />
                     <LocationMarker form={form} />
                 </MapContainer>
                 </div>

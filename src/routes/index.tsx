@@ -22,7 +22,13 @@ function App() {
                 {locations.map((location) => (
                   <li key={location.id} className='flex items-center gap-2'>
                     <MapPin className='text-primary' />
-                    <Link to='/' className='hover:text-primary transition-colors'>
+                    <Link 
+                      to='/bidets/$bidetId' 
+                      params={{
+                        bidetId: location.id.toString()
+                      }} 
+                      className='hover:text-primary transition-colors'
+                    >
                       {location.name}
                     </Link>
                   </li>

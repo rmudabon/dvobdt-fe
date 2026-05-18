@@ -1,16 +1,7 @@
 import { useLocations } from "@/hooks/useLocations";
-import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
-import L from "leaflet"
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
-
-const CUSTOM_MARKER_ICON = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-})
+import { BOUNDS, CUSTOM_MARKER_ICON, DAVAO_CITY_COORDS } from "@/utils/constants";
+import { MapContainer, Marker, Popup } from "react-leaflet"
+import { CustomTileLayer } from "./CustomTileLayer";
 
 const PinMap = () => {
     const { data, isLoading, error } = useLocations()
@@ -41,11 +32,7 @@ const PinMap = () => {
 
     return (
         <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
-            <TileLayer
-                bounds={BOUNDS}
-                attribution='© OpenStreetMap contributors, © CartoDB'
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-            />
+            <CustomTileLayer />
             {data.map(location => (
                 <Marker
                     key={location.name}

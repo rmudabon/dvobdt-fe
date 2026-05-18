@@ -59,6 +59,27 @@ export const fetchLocations = async () => {
     return parsedData.data
 }
 
+export const fetchLocationDetail = async (id: number) => {
+    const csrftoken = getCookie('csrftoken');
+    const res = await fetch(`${API_URL}/locations/${id}/`, {
+        credentials: 'include',
+        headers: {
+            "X-CSRFToken": csrftoken ?? '',
+        },
+    })
+
+    if (!res.ok) throw res
+
+    const data = await res.json()
+    const parsedData = locationSchema.safeParse(data)
+
+    if (!parsedData.success) {
+        throw new Error("Failed to parse location detail data")
+    }
+
+    return parsedData.data
+}
+
 export const createLocation = async (data: LocationFormData) => {
     const csrftoken = getCookie('csrftoken');
     return fetch(`${API_URL}/locations/`, {
