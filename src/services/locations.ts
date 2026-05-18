@@ -24,7 +24,18 @@ export const locationFormSchema = z.object({
     imageUrl: z.string().optional()
 })
 
+export const geolocationAutocompleteItemSchema = z.object({
+    label: z.string(),
+    street: z.string().nullable(),
+    name: z.string(),
+    longitude: z.number(),
+    latitude: z.number(),
+})
+
+export const geolocationAutocompleteSchema = z.array(geolocationAutocompleteItemSchema)
+
 export type LocationFormData = z.infer<typeof locationFormSchema>
+export type GeolocationAutocompleteItem = z.infer<typeof geolocationAutocompleteItemSchema>
 
 export const fetchLocations = async () => {
     const csrftoken = getCookie('csrftoken');
@@ -64,4 +75,28 @@ export const createLocation = async (data: LocationFormData) => {
         return res.json()
     })
     .catch(res => console.error(res))
+}
+
+export const fetchGeolocationAutocomplete = async (query: string) => {
+    if (!query.trim()) return []
+
+    const csrftoken = getCookie('csrftoken')
+    const params = new URLSearchParams({ text: query })
+    const response = await fetch(`${API_URL}/geolocation/autocomplete?${params.toString()}`, {
+        credentials: 'include',
+        headers: {
+            "X-CSRFToken": csrftoken ?? '',
+        },
+    })
+
+    if (!response.ok) throw response
+
+    const data = await response.json()
+    const parsedData = geolocationAutocompleteSchema.safeParse(data)
+
+    if (!parsedData.success) {
+        throw new Error("Failed to parse geolocation autocomplete data")
+    }
+
+    return parsedData.data
 }

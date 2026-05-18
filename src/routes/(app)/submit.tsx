@@ -1,18 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { createLocation, locationFormSchema, stallOptionSchema } from "@/services/locations";
+import { createLocation, fetchGeolocationAutocomplete, locationFormSchema, stallOptionSchema } from "@/services/locations";
 import { toast } from "sonner";
-import type { LocationFormData } from "@/services/locations";
+import type { GeolocationAutocompleteItem, LocationFormData } from "@/services/locations";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LocateFixed } from "lucide-react";
+import { debounce } from "@/lib/utils";
 
 export const Route = createFileRoute('/(app)/submit')({
     component: LocationForm,
@@ -79,6 +81,22 @@ function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) 
 function LocationForm() {
     const form = useLocationForm()
     const hasRequestedLocation = useRef(false)
+    const [addressSuggestions, setAddressSuggestions] = useState<GeolocationAutocompleteItem[]>([])
+    const [isAddressLoading, setIsAddressLoading] = useState(false)
+    const debouncedFetchSuggestionsRef = useRef(
+        debounce(async (text: string) => {
+            try {
+                setIsAddressLoading(true)
+                const suggestions = await fetchGeolocationAutocomplete(text)
+                setAddressSuggestions(suggestions)
+            } catch (error) {
+                console.error(error)
+                setAddressSuggestions([])
+            } finally {
+                setIsAddressLoading(false)
+            }
+        }, 350)
+    )
 
     const getCurrentLocation = () => {
         if (!navigator.geolocation) {
@@ -95,6 +113,26 @@ function LocationForm() {
         if (hasRequestedLocation.current) return
         hasRequestedLocation.current = true
         getCurrentLocation()
+    }, [])
+
+    const handleAddressInputChange = (value: string) => {
+        form.setFieldValue("address", value)
+
+        const text = value.trim()
+        if (text.length < 3) {
+            debouncedFetchSuggestionsRef.current.cancel()
+            setAddressSuggestions([])
+            setIsAddressLoading(false)
+            return
+        }
+
+        debouncedFetchSuggestionsRef.current(text)
+    }
+
+    useEffect(() => {
+        return () => {
+            debouncedFetchSuggestionsRef.current.cancel()
+        }
     }, [])
 
     return (
@@ -129,12 +167,48 @@ function LocationForm() {
                     {(field) => (
                         <Field className="flex flex-col">
                             <FieldLabel htmlFor={field.name}>Address</FieldLabel>
-                            <Input
-                                id={field.name}
+                            <Combobox
                                 value={field.state.value}
-                                onChange={e => field.handleChange(e.target.value)}
-                                className="border border-teal-700 rounded-md p-2"
-                            />
+                                inputValue={field.state.value}
+                                onInputValueChange={handleAddressInputChange}
+                                onValueChange={(value) => {
+                                    field.handleChange(value ?? "")
+                                    if (!value) return
+                                    const selectedSuggestion = addressSuggestions.find(
+                                        (suggestion) => suggestion.label === value
+                                    )
+                                    if (!selectedSuggestion) return
+
+                                    form.setFieldValue("latitude", selectedSuggestion.latitude)
+                                    form.setFieldValue("longitude", selectedSuggestion.longitude)
+                                }}
+                                items={addressSuggestions}
+                            >
+                                <ComboboxInput
+                                    id={field.name}
+                                    className="w-full"
+                                    placeholder="Start typing an address..."
+                                    showClear
+                                />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>
+                                        {isAddressLoading ? "Loading suggestions..." : "No suggestions found. Start typing to search for an address."}
+                                    </ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(suggestion) => {
+                                            console.log(suggestion)
+                                            return (
+                                                <ComboboxItem key={`${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`} value={suggestion.label}>
+                                                    <div className="flex flex-col">
+                                                        <span>{suggestion.label}</span>
+                                                        <span className="text-xs text-muted-foreground">{suggestion.street}</span>
+                                                    </div>
+                                                </ComboboxItem>
+                                            )
+                                        }}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
                             <p className="text-red-500">{field.state.meta.errors[0]?.message}</p>
                             <Button type='button' variant='outline' className="cursor-pointer" onClick={getCurrentLocation}>
                                 <LocateFixed />
@@ -143,7 +217,7 @@ function LocationForm() {
                         </Field>
                     )}
                 </form.Field>
-                <div className="h-80">
+                <div className="h-80 relative z-0">
                 <MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
                     <TileLayer
                         bounds={BOUNDS}
