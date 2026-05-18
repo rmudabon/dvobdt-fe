@@ -1,7 +1,9 @@
+import { useEffect, useRef } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createLocation, locationFormSchema, stallOptionSchema } from "@/services/locations";
+import { toast } from "sonner";
 import type { LocationFormData } from "@/services/locations";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { BOUNDS, DAVAO_CITY_COORDS } from "@/utils/constants";
@@ -40,12 +42,9 @@ const useLocationForm = () => {
 
     const submitLocation = useMutation({
         mutationFn: createLocation,
-        onSuccess(data) {
-            console.log("Location created successfully", data)
+        onSuccess() {
+            toast.success("Bidet application submitted successfully!")
             form.reset()
-        },
-        onError(error) {
-            console.error("Error creating location", error)
         }
     })
     return form
@@ -62,6 +61,11 @@ function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) 
         }
     })
 
+    useEffect(() => {
+        if (!latitude || !longitude) return
+        map.flyTo([latitude, longitude], map.getZoom())
+    }, [latitude, longitude, map])
+
     if (!latitude || !longitude) return null
     return (
         <Marker position={[latitude, longitude]}>
@@ -74,16 +78,24 @@ function LocationMarker({ form }: { form: ReturnType<typeof useLocationForm> }) 
 
 function LocationForm() {
     const form = useLocationForm()
+    const hasRequestedLocation = useRef(false)
 
     const getCurrentLocation = () => {
-        if(!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser")
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by your browser")
+            return
         }
         navigator.geolocation.getCurrentPosition((position) => {
             form.setFieldValue('latitude', position.coords.latitude)
             form.setFieldValue('longitude', position.coords.longitude)
         })
     }
+
+    useEffect(() => {
+        if (hasRequestedLocation.current) return
+        hasRequestedLocation.current = true
+        getCurrentLocation()
+    }, [])
 
     return (
         <div className="container mx-auto flex justify-center p-8">
