@@ -25,6 +25,13 @@ function RouteComponent() {
             {(location) => (
                 <div className='p-8'>
                     <h1 className='text-3xl font-semibold'>{location.name}</h1>
+                    {location.image_url && (
+                        <img
+                            src={location.image_url}
+                            alt={location.name}
+                            className='mt-4 w-full max-h-72 object-cover rounded-md'
+                        />
+                    )}
                     <MapContainer center={[location.lat, location.lng]} zoom={17} maxBounds={BOUNDS} className='mt-8 h-96 rounded-md'>
                         <CustomTileLayer />
                         <Marker

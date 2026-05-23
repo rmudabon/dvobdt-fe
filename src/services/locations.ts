@@ -44,7 +44,7 @@ export const locationFormSchema = z.object({
 		),
 	stall: stallOptionSchema,
 	description: z.string().optional(),
-	imageUrl: z.string().optional(),
+	image_url: z.string().optional(),
 });
 
 export const geolocationAutocompleteItemSchema = z.object({
@@ -111,6 +111,11 @@ export const fetchLocationDetail = async (id: number) => {
 
 export const createLocation = async (data: LocationFormData) => {
 	const csrftoken = getCookie("csrftoken");
+	const payload = {
+		...data,
+		latitude: parseFloat(data.latitude.toFixed(6)),
+		longitude: parseFloat(data.longitude.toFixed(6)),
+	};
 	return fetch(`${API_URL}/locations/`, {
 		method: "POST",
 		headers: {
@@ -118,13 +123,16 @@ export const createLocation = async (data: LocationFormData) => {
 			"X-CSRFToken": csrftoken ?? "",
 		},
 		credentials: "include",
-		body: JSON.stringify(data),
+		body: JSON.stringify(payload),
 	})
 		.then((res) => {
 			if (!res.ok) throw res;
 			return res.json();
 		})
-		.catch((res) => console.error(res));
+		.catch((res) => {
+			console.error("Failed to create location:", res);
+			throw new Error(res.statusText || "Failed to create location");
+		});
 };
 
 export const fetchGeolocationAutocomplete = async (query: string) => {
@@ -152,4 +160,32 @@ export const fetchGeolocationAutocomplete = async (query: string) => {
 	}
 
 	return parsedData.data;
+};
+
+export const uploadLocationImage = async (file: File): Promise<string> => {
+	const csrfToken = getCookie("csrftoken");
+	const res = await fetch(`${API_URL}/upload/`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRFToken": csrfToken ?? "",
+		},
+		body: JSON.stringify({ file_name: file.name, file_type: file.type }),
+	});
+
+	if (!res.ok) {
+		const text = await res.text().catch(() => res.statusText);
+		throw new Error(text || "Failed to get upload URL");
+	}
+
+	const { url } = (await res.json()) as { url: string };
+
+	const uploadRes = await fetch(url, { method: "PUT", body: file });
+	if (!uploadRes.ok) {
+		const text = await uploadRes.text().catch(() => uploadRes.statusText);
+		throw new Error(text || "File upload failed");
+	}
+
+	return url.split("?")[0];
 };
