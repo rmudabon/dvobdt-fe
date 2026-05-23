@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
 import { useUser } from '../hooks/useAuth'
-import { Home, Menu, Upload, X } from 'lucide-react'
+import { Home, Menu, Upload, User, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -101,6 +101,19 @@ export default function Header() {
           >
             <Upload size={20} />
             <span className="font-medium">Upload</span>
+          </Link>
+
+          <Link
+            to="/profile"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
+            }}
+          >
+            <User size={20} />
+            <span className="font-medium">Profile</span>
           </Link>
         </nav>
       </aside>

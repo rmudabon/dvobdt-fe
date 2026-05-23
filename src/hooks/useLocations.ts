@@ -10,6 +10,15 @@ export const useLocations = () => {
     return query
 }
 
+export const useMyLocations = () => {
+    const query = useQuery({
+        queryKey: ['locations', 'mine'],
+        queryFn: () => fetchLocations({ mine: 'true' }),
+    })
+
+    return query
+}
+
 export const useLocation = (id: number) => {
     const query = useQuery({
         queryKey: ['locations', id],
