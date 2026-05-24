@@ -1,122 +1,136 @@
-import { Link } from '@tanstack/react-router'
-
-import { useState } from 'react'
-import { useUser } from '../hooks/useAuth'
-import { Home, Menu, Upload, User, X } from 'lucide-react'
+import { Link } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
+import { useUser } from "../hooks/useAuth";
+import { Button } from "./ui/button";
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false)
-  const user = useUser()
+	const [isOpen, setIsOpen] = useState(false);
+	const user = useUser();
 
-  return (
-    <>
-      <header className="p-4 flex items-center bg-gray-800 text-white shadow-lg">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            <img
-              src="/tanstack-word-logo-white.svg"
-              alt="TanStack Logo"
-              className="h-10"
-            />
-          </Link>
-        </h1>
-      </header>
+	return (
+		<>
+			<header className="p-8 flex justify-between items-center border-primary text-primary">
+				<div className="flex items-center">
+					<Button
+						onClick={() => setIsOpen(true)}
+						aria-label="Open menu"
+						variant="ghost"
+						className="sm:hidden"
+						size="icon-lg"
+					>
+						<Menu size={24} />
+					</Button>
+					<h1 className="ml-4 text-xl font-semibold">
+						<Link to="/">
+							<h1 className="text-primary font-semibold">dvobdt</h1>
+						</Link>
+					</h1>
+				</div>
+				<nav className="hidden sm:block">
+					<ul className="flex items-center gap-4">
+						{user?.data ? (
+							<>
+								<li>
+									<Link to="/submit">Add Bidet</Link>
+								</li>
+								<li>
+									<Link to="/logout">Logout</Link>
+								</li>
+							</>
+						) : (
+							<>
+								<li>
+									<Link to="/login">Log In</Link>
+								</li>
+								<li>
+									<Button asChild>
+										<Link to="/register">Sign Up</Link>
+									</Button>
+								</li>
+							</>
+						)}
+					</ul>
+				</nav>
+			</header>
 
-      <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Navigation</h2>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            aria-label="Close menu"
-          >
-            <X size={24} />
-          </button>
-        </div>
+			<aside
+				className={`fixed top-0 left-0 h-full w-80 bg-secondary text-primary shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+					isOpen ? "translate-x-0" : "-translate-x-full"
+				}`}
+			>
+				<div className="flex items-center justify-between p-4 border-b">
+					<h2 className="text-xl font-bold">dvobdt</h2>
+					<Button
+						onClick={() => setIsOpen(false)}
+						aria-label="Close menu"
+						variant="ghost"
+						size="icon-lg"
+					>
+						<X size={24} />
+					</Button>
+				</div>
 
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </Link>
+				<nav className="flex-1 p-4 overflow-y-auto">
+					<div className="mb-4">
+						{(() => {
+							if (user?.data) {
+								return (
+									<div className="flex flex-col gap-2">
+										<span className="text-sm">Signed in as</span>
+										<span className="font-semibold">{user.data.username}</span>
+										<Button asChild>
+											<Link to="/profile" onClick={() => setIsOpen(false)}>
+												<span className="font-medium">My Submissions</span>
+											</Link>
+										</Button>
+										<Button asChild>
+											<Link to="/logout" onClick={() => setIsOpen(false)}>
+												Logout
+											</Link>
+										</Button>
+									</div>
+								);
+							}
 
-          <div className="mt-4 p-3">
-            {/* Simple auth links */}
-            {(() => {
-              if (user?.data) {
-                return (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm">Signed in as</span>
-                    <span className="font-semibold">{user.data.username}</span>
-                    <Link
-                      to="/logout"
-                      onClick={() => setIsOpen(false)}
-                      className="text-red-400 hover:underline"
-                    >
-                      Logout
-                    </Link>
-                  </div>
-                )
-              }
+							return (
+								<>
+									<Button
+										asChild
+										className="flex items-center justify-start"
+										size="lg"
+										variant="link"
+									>
+										<Link to="/login" onClick={() => setIsOpen(false)}>
+											Log In
+										</Link>
+									</Button>
+									<Button
+										asChild
+										className="flex items-center justify-start"
+										size="lg"
+									>
+										<Link to="/register" onClick={() => setIsOpen(false)}>
+											Sign Up
+										</Link>
+									</Button>
+								</>
+							);
+						})()}
+					</div>
 
-              return (
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="text-cyan-400 hover:underline"
-                >
-                  Login
-                </Link>
-              )
-            })()}
-          </div>
-
-          <Link
-            to="/upload"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <Upload size={20} />
-            <span className="font-medium">Upload</span>
-          </Link>
-
-          <Link
-            to="/profile"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <User size={20} />
-            <span className="font-medium">Profile</span>
-          </Link>
-        </nav>
-      </aside>
-    </>
-  )
+					<Button
+						asChild
+						variant="link"
+						size="lg"
+						className="flex items-center justify-start"
+					>
+						<Link to="/" onClick={() => setIsOpen(false)}>
+							<span className="font-medium">Home</span>
+						</Link>
+					</Button>
+				</nav>
+			</aside>
+		</>
+	);
 }

@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UploadRouteImport } from './routes/upload'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LogoutRouteImport } from './routes/logout'
@@ -18,11 +17,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BidetsBidetIdRouteImport } from './routes/bidets/$bidetId'
 import { Route as appSubmitRouteImport } from './routes/(app)/submit'
 
-const UploadRoute = UploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -65,7 +59,6 @@ export interface FileRoutesByFullPath {
   '/logout': typeof LogoutRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
   '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
@@ -75,7 +68,6 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upload': typeof UploadRoute
   '/submit': typeof appSubmitRoute
   '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
@@ -86,7 +78,6 @@ export interface FileRoutesById {
   '/logout': typeof LogoutRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upload': typeof UploadRoute
   '/(app)/submit': typeof appSubmitRoute
   '/bidets/$bidetId': typeof BidetsBidetIdRoute
 }
@@ -98,7 +89,6 @@ export interface FileRouteTypes {
     | '/logout'
     | '/profile'
     | '/register'
-    | '/upload'
     | '/submit'
     | '/bidets/$bidetId'
   fileRoutesByTo: FileRoutesByTo
@@ -108,7 +98,6 @@ export interface FileRouteTypes {
     | '/logout'
     | '/profile'
     | '/register'
-    | '/upload'
     | '/submit'
     | '/bidets/$bidetId'
   id:
@@ -118,7 +107,6 @@ export interface FileRouteTypes {
     | '/logout'
     | '/profile'
     | '/register'
-    | '/upload'
     | '/(app)/submit'
     | '/bidets/$bidetId'
   fileRoutesById: FileRoutesById
@@ -129,20 +117,12 @@ export interface RootRouteChildren {
   LogoutRoute: typeof LogoutRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
-  UploadRoute: typeof UploadRoute
   appSubmitRoute: typeof appSubmitRoute
   BidetsBidetIdRoute: typeof BidetsBidetIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -201,7 +181,6 @@ const rootRouteChildren: RootRouteChildren = {
   LogoutRoute: LogoutRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
-  UploadRoute: UploadRoute,
   appSubmitRoute: appSubmitRoute,
   BidetsBidetIdRoute: BidetsBidetIdRoute,
 }
