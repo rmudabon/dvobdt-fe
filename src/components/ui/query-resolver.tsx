@@ -29,11 +29,10 @@ export function QueryResolver<TData>({
 		return (
 			<div className="flex flex-col gap-4">
 				<p className="text-red-500 text-sm">
-					Something went wrong. Please try again.
+					Failed to fetch data. Please try again.
 				</p>
 				<Button
 					variant="outline"
-					size="sm"
 					className="w-fit"
 					onClick={() => query.refetch()}
 				>
