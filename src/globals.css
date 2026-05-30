@@ -140,8 +140,4 @@
         @apply h-full w-full font-display;
     }
 
-    .leaflet-marker-icon {
-        @apply hue-rotate-45;
-    }
-
 }

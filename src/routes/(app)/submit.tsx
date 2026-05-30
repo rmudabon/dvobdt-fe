@@ -1,8 +1,8 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LocateFixed, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, useMapEvents } from "react-leaflet";
 import { toast } from "sonner";
 import { CustomTileLayer } from "@/components/map/CustomTileLayer";
@@ -58,6 +58,7 @@ const defaultValues: LocationFormData = {
 };
 
 const useLocationForm = () => {
+	const navigate = useNavigate();
 	const form = useForm({
 		defaultValues,
 		validators: {
@@ -71,9 +72,12 @@ const useLocationForm = () => {
 
 	const submitLocation = useMutation({
 		mutationFn: createLocation,
-		onSuccess() {
+		onSuccess(data) {
 			toast.success("Bidet application submitted successfully!");
-			form.reset();
+			navigate({
+				to: "/bidets/$bidetId",
+				params: { bidetId: data.id.toString() },
+			});
 		},
 	});
 	return form;
@@ -229,7 +233,7 @@ function LocationForm() {
 		}, 350),
 	);
 
-	const getCurrentLocation = () => {
+	const getCurrentLocation = useCallback(() => {
 		if (!navigator.geolocation) {
 			toast.error("Geolocation is not supported by your browser");
 			return;
@@ -238,7 +242,7 @@ function LocationForm() {
 			form.setFieldValue("latitude", position.coords.latitude);
 			form.setFieldValue("longitude", position.coords.longitude);
 		});
-	};
+	}, [form]);
 
 	const handleAddressInputChange = (value: string) => {
 		form.setFieldValue("address", value);
@@ -262,7 +266,7 @@ function LocationForm() {
 		return () => {
 			debouncedFetchSuggestionsRef.current.cancel();
 		};
-	}, []);
+	}, [getCurrentLocation]);
 
 	return (
 		<div className="container mx-auto flex justify-center p-8">

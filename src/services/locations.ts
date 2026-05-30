@@ -27,6 +27,8 @@ export const locationSchema = z.object({
 	distance: z.number().nullable(),
 });
 
+export type BidetLocation = z.infer<typeof locationSchema>;
+
 export const locationFormSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	address: z.string().min(1, "Address is required"),
@@ -125,9 +127,14 @@ export const createLocation = async (data: LocationFormData) => {
 		credentials: "include",
 		body: JSON.stringify(payload),
 	})
-		.then((res) => {
+		.then(async (res) => {
 			if (!res.ok) throw res;
-			return res.json();
+			const data = await res.json();
+			const parsed = locationSchema.safeParse(data);
+			if (!parsed.success) {
+				throw new Error("Failed to parse created location data");
+			}
+			return parsed.data;
 		})
 		.catch((res) => {
 			console.error("Failed to create location:", res);

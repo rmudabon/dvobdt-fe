@@ -1,39 +1,43 @@
-import { MapContainer, Marker, Popup } from "react-leaflet";
-import { useLocations } from "@/hooks/useLocations";
+import type { LatLngExpression } from "leaflet";
+import { useEffect } from "react";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
+import type { BidetLocation } from "@/services/locations";
 import {
 	BOUNDS,
 	CUSTOM_MARKER_ICON,
 	DAVAO_CITY_COORDS,
+	USER_LOCATION_ICON,
 } from "@/utils/constants";
-import { Skeleton } from "../ui/skeleton";
 import { CustomTileLayer } from "./CustomTileLayer";
 
-const PinMap = () => {
-	const { data, isLoading, error } = useLocations();
+const MapCenter = ({ center }: { center: LatLngExpression }) => {
+	const map = useMap();
+	useEffect(() => {
+		map.setView(center);
+	}, [map, center]);
+	return null;
+};
 
-	if (isLoading) {
-		return <Skeleton className="h-full w-full" />;
-	}
-
-	if (error) {
-		return (
-			<div className="flex justify-center items-center h-full rounded-md bg-neutral-200">
-				<p>An error occurred fetching bidets.</p>
-			</div>
-		);
-	}
-
-	if (!data || data.length === 0) {
-		return (
-			<div className="flex justify-center items-center h-full rounded-md bg-neutral-200">
-				<p>No bidets found. Be the first to add one!</p>
-			</div>
-		);
-	}
+const PinMap = ({
+	data,
+	center,
+}: {
+	data: BidetLocation[];
+	center?: { lat: number; lng: number };
+}) => {
+	const initialCenter: LatLngExpression = center
+		? [center.lat, center.lng]
+		: DAVAO_CITY_COORDS;
 
 	return (
-		<MapContainer center={DAVAO_CITY_COORDS} zoom={14} maxBounds={BOUNDS}>
+		<MapContainer center={initialCenter} zoom={18} maxBounds={BOUNDS}>
 			<CustomTileLayer />
+			{center && <MapCenter center={[center.lat, center.lng]} />}
+			{center && (
+				<Marker position={[center.lat, center.lng]} icon={USER_LOCATION_ICON}>
+					<Popup>Your location</Popup>
+				</Marker>
+			)}
 			{data.map((location) => (
 				<Marker
 					key={location.name}
