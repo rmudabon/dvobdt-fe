@@ -1,7 +1,7 @@
 import type { LatLngBoundsLiteral, LatLngExpression } from "leaflet";
 import L from "leaflet";
 
-export const API_URL = `http://${import.meta.env.VITE_BASE_API_URL}/api`;
+export const API_URL = `${import.meta.env.VITE_BASE_API_URL}/api`;
 
 export const DAVAO_CITY_CENTER = [7.0667, 125.6];
 
