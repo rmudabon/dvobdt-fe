@@ -1,6 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { LocateFixed, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, useMapEvents } from "react-leaflet";
@@ -22,8 +22,10 @@ import {
 	FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { QueryResolver } from "@/components/ui/query-resolver";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { useUser } from "@/hooks/useAuth";
 import { debounce } from "@/lib/utils";
 import type {
 	GeolocationAutocompleteItem,
@@ -154,6 +156,9 @@ function ImageUploadField({
 	return (
 		<Field className="flex flex-col gap-2">
 			<FieldLabel>Image</FieldLabel>
+			<p className="text-sm text-muted-foreground">
+				Adding a photo helps your submission get approved faster.
+			</p>
 			<div
 				onDrop={(e) => {
 					e.preventDefault();
@@ -212,6 +217,7 @@ function ImageUploadField({
 }
 
 function LocationForm() {
+	const userQuery = useUser();
 	const form = useLocationForm();
 	const hasRequestedLocation = useRef(false);
 	const [addressSuggestions, setAddressSuggestions] = useState<
@@ -269,187 +275,219 @@ function LocationForm() {
 	}, [getCurrentLocation]);
 
 	return (
-		<div className="container mx-auto flex justify-center p-8">
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					form.handleSubmit();
-				}}
-				className="space-y-4 w-full max-w-xl"
-			>
-				<FieldLegend className="font-bold text-2xl!">New Bidet</FieldLegend>
-				<form.Field name="name">
-					{(field) => (
-						<Field className="flex flex-col">
-							<FieldLabel htmlFor={field.name}>
-								Name{" "}
-								<span className="text-red-500" aria-hidden="true">
-									*
-								</span>
-							</FieldLabel>
-							<Input
-								id={field.name}
-								value={field.state.value}
-								onChange={(e) => field.handleChange(e.target.value)}
-								className="border border-teal-700 rounded-md p-2"
-							/>
-							<p className="text-red-500">
-								{field.state.meta.errors[0]?.message}
-							</p>
-						</Field>
-					)}
-				</form.Field>
-				<form.Field name="address">
-					{(field) => (
-						<Field className="flex flex-col">
-							<FieldLabel htmlFor={field.name}>
-								Address{" "}
-								<span className="text-red-500" aria-hidden="true">
-									*
-								</span>
-							</FieldLabel>
-							<Combobox
-								value={field.state.value}
-								inputValue={field.state.value}
-								onInputValueChange={handleAddressInputChange}
-								onValueChange={(value) => {
-									field.handleChange(value ?? "");
-									if (!value) return;
-									const selectedSuggestion = addressSuggestions.find(
-										(suggestion) => suggestion.label === value,
-									);
-									if (!selectedSuggestion) return;
-
-									form.setFieldValue("latitude", selectedSuggestion.latitude);
-									form.setFieldValue("longitude", selectedSuggestion.longitude);
-								}}
-								items={addressSuggestions}
-							>
-								<ComboboxInput
-									id={field.name}
-									className="w-full"
-									placeholder="Start typing an address..."
-									showClear
-								/>
-								<ComboboxContent>
-									<ComboboxEmpty>
-										{isAddressLoading
-											? "Loading suggestions..."
-											: "No suggestions found. Start typing to search for an address."}
-									</ComboboxEmpty>
-									<ComboboxList>
-										{(suggestion) => {
-											console.log(suggestion);
-											return (
-												<ComboboxItem
-													key={`${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`}
-													value={suggestion.label}
-												>
-													<div className="flex flex-col">
-														<span>{suggestion.label}</span>
-														<span className="text-xs text-muted-foreground">
-															{suggestion.street}
-														</span>
-													</div>
-												</ComboboxItem>
-											);
-										}}
-									</ComboboxList>
-								</ComboboxContent>
-							</Combobox>
-							<p className="text-red-500">
-								{field.state.meta.errors[0]?.message}
-							</p>
-							<Button
-								type="button"
-								variant="outline"
-								className="cursor-pointer"
-								onClick={getCurrentLocation}
-							>
-								<LocateFixed />
-								Use Current Location
-							</Button>
-						</Field>
-					)}
-				</form.Field>
-				<div className="h-80 relative z-0">
-					<MapContainer center={DAVAO_CITY_COORDS} zoom={17} maxBounds={BOUNDS}>
-						<CustomTileLayer />
-						<LocationMarker form={form} />
-					</MapContainer>
-				</div>
-				<form.Field name="description">
-					{(field) => (
-						<Field className="flex flex-col">
-							<FieldLabel htmlFor={field.name}>Description</FieldLabel>
-							<Textarea
-								id={field.name}
-								value={field.state.value}
-								onChange={(e) => field.handleChange(e.target.value)}
-								className="border border-teal-700 rounded-md p-2"
-								placeholder="Add other information here..."
-								rows={4}
-							/>
-							<p className="text-red-500">
-								{field.state.meta.errors[0]?.message}
-							</p>
-						</Field>
-					)}
-				</form.Field>
-				<ImageUploadField form={form} />
-				<form.Field name="stall">
-					{(field) => (
-						<FieldSet className="">
-							<FieldLegend variant="label">
-								Stall Type{" "}
-								<span className="text-red-500" aria-hidden="true">
-									*
-								</span>
-							</FieldLegend>
-							<RadioGroup
-								onValueChange={(value) => {
-									const parsed = stallOptionSchema.safeParse(value);
-									if (parsed.success) {
-										field.handleChange(parsed.data);
-									}
-								}}
-								defaultValue={field.state.value}
-							>
-								<Field orientation="horizontal">
-									<RadioGroupItem value="M" id="stall-m" />
-									<FieldLabel htmlFor="stall-m">Male</FieldLabel>
-								</Field>
-								<Field orientation="horizontal">
-									<RadioGroupItem value="F" id="stall-f" />
-									<FieldLabel htmlFor="stall-f">Female</FieldLabel>
-								</Field>
-								<Field orientation="horizontal">
-									<RadioGroupItem value="U" id="stall-u" />
-									<FieldLabel htmlFor="stall-u">Unisex</FieldLabel>
-								</Field>
-							</RadioGroup>
-						</FieldSet>
-					)}
-				</form.Field>
-				<form.Subscribe
-					selector={(state) => [
-						state.canSubmit,
-						state.isSubmitting,
-						state.isPristine,
-					]}
-					children={([canSubmit, isSubmitting, isPristine]) => (
-						<Button
-							type="submit"
-							role="button"
-							size="lg"
-							className="w-full"
-							disabled={!canSubmit || isSubmitting || isPristine}
-						>
-							Submit
+		<QueryResolver query={userQuery}>
+			{(user) =>
+				!user ? (
+					<div className="flex flex-col items-center justify-center flex-1 gap-4 p-8 text-center">
+						<h1 className="text-2xl font-semibold">Sign in required</h1>
+						<p className="text-muted-foreground max-w-md">
+							You need to be signed in to submit a new bidet location.
+						</p>
+						<Button asChild>
+							<Link to="/login">Sign in</Link>
 						</Button>
-					)}
-				/>
-			</form>
-		</div>
+					</div>
+				) : (
+					<div className="container mx-auto flex justify-center p-8">
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								form.handleSubmit();
+							}}
+							className="space-y-4 w-full max-w-xl"
+						>
+							<FieldLegend className="font-bold text-2xl!">
+								New Bidet
+							</FieldLegend>
+							<form.Field name="name">
+								{(field) => (
+									<Field className="flex flex-col">
+										<FieldLabel htmlFor={field.name}>
+											Name{" "}
+											<span className="text-red-500" aria-hidden="true">
+												*
+											</span>
+										</FieldLabel>
+										<Input
+											id={field.name}
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="border border-teal-700 rounded-md p-2"
+										/>
+										<p className="text-red-500">
+											{field.state.meta.errors[0]?.message}
+										</p>
+									</Field>
+								)}
+							</form.Field>
+							<form.Field name="address">
+								{(field) => (
+									<Field className="flex flex-col">
+										<FieldLabel htmlFor={field.name}>
+											Address{" "}
+											<span className="text-red-500" aria-hidden="true">
+												*
+											</span>
+										</FieldLabel>
+										<Combobox
+											value={field.state.value}
+											inputValue={field.state.value}
+											onInputValueChange={handleAddressInputChange}
+											onValueChange={(value) => {
+												field.handleChange(value ?? "");
+												if (!value) return;
+												const selectedSuggestion = addressSuggestions.find(
+													(suggestion) => suggestion.label === value,
+												);
+												if (!selectedSuggestion) return;
+
+												form.setFieldValue(
+													"latitude",
+													selectedSuggestion.latitude,
+												);
+												form.setFieldValue(
+													"longitude",
+													selectedSuggestion.longitude,
+												);
+											}}
+											items={addressSuggestions}
+										>
+											<ComboboxInput
+												id={field.name}
+												className="w-full"
+												placeholder="Start typing an address..."
+												showClear
+											/>
+											<ComboboxContent>
+												<ComboboxEmpty>
+													{isAddressLoading
+														? "Loading suggestions..."
+														: "No suggestions found. Start typing to search for an address."}
+												</ComboboxEmpty>
+												<ComboboxList>
+													{(suggestion) => {
+														console.log(suggestion);
+														return (
+															<ComboboxItem
+																key={`${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`}
+																value={suggestion.label}
+															>
+																<div className="flex flex-col">
+																	<span>{suggestion.label}</span>
+																	<span className="text-xs text-muted-foreground">
+																		{suggestion.street}
+																	</span>
+																</div>
+															</ComboboxItem>
+														);
+													}}
+												</ComboboxList>
+											</ComboboxContent>
+										</Combobox>
+										<p className="text-red-500">
+											{field.state.meta.errors[0]?.message}
+										</p>
+										<Button
+											type="button"
+											variant="outline"
+											className="cursor-pointer"
+											onClick={getCurrentLocation}
+										>
+											<LocateFixed />
+											Use Current Location
+										</Button>
+									</Field>
+								)}
+							</form.Field>
+							<div className="h-80 relative z-0">
+								<MapContainer
+									center={DAVAO_CITY_COORDS}
+									zoom={17}
+									maxBounds={BOUNDS}
+								>
+									<CustomTileLayer />
+									<LocationMarker form={form} />
+								</MapContainer>
+							</div>
+							<form.Field name="description">
+								{(field) => (
+									<Field className="flex flex-col">
+										<FieldLabel htmlFor={field.name}>Description</FieldLabel>
+										<Textarea
+											id={field.name}
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="border border-teal-700 rounded-md p-2"
+											placeholder="e.g., 2nd floor near the elevator, beside the food court entrance, accessible from the main hallway..."
+											rows={4}
+										/>
+										<p className="text-sm text-muted-foreground">
+											Include details like the floor, nearby landmarks, or any
+											directions that help others find it.
+										</p>
+										<p className="text-red-500">
+											{field.state.meta.errors[0]?.message}
+										</p>
+									</Field>
+								)}
+							</form.Field>
+							<ImageUploadField form={form} />
+							<form.Field name="stall">
+								{(field) => (
+									<FieldSet className="">
+										<FieldLegend variant="label">
+											Stall Type{" "}
+											<span className="text-red-500" aria-hidden="true">
+												*
+											</span>
+										</FieldLegend>
+										<RadioGroup
+											onValueChange={(value) => {
+												const parsed = stallOptionSchema.safeParse(value);
+												if (parsed.success) {
+													field.handleChange(parsed.data);
+												}
+											}}
+											defaultValue={field.state.value}
+										>
+											<Field orientation="horizontal">
+												<RadioGroupItem value="M" id="stall-m" />
+												<FieldLabel htmlFor="stall-m">Male</FieldLabel>
+											</Field>
+											<Field orientation="horizontal">
+												<RadioGroupItem value="F" id="stall-f" />
+												<FieldLabel htmlFor="stall-f">Female</FieldLabel>
+											</Field>
+											<Field orientation="horizontal">
+												<RadioGroupItem value="U" id="stall-u" />
+												<FieldLabel htmlFor="stall-u">Unisex</FieldLabel>
+											</Field>
+										</RadioGroup>
+									</FieldSet>
+								)}
+							</form.Field>
+							<form.Subscribe
+								selector={(state) => [
+									state.canSubmit,
+									state.isSubmitting,
+									state.isPristine,
+								]}
+								children={([canSubmit, isSubmitting, isPristine]) => (
+									<Button
+										type="submit"
+										role="button"
+										size="lg"
+										className="w-full"
+										disabled={!canSubmit || isSubmitting || isPristine}
+									>
+										Submit
+									</Button>
+								)}
+							/>
+						</form>
+					</div>
+				)
+			}
+		</QueryResolver>
 	);
 }
