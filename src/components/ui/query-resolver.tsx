@@ -11,7 +11,7 @@ const DefaultSkeleton = () => (
 );
 
 type QueryResolverProps<TData> = {
-	query: UseQueryResult<TData>;
+	query: UseQueryResult<TData, Error>;
 	children: (data: TData) => React.ReactNode;
 	loadingFallback?: React.ReactNode;
 };
