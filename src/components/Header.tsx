@@ -37,6 +37,9 @@ export default function Header() {
 									</Button>
 								</li>
 								<li>
+									<Link to="/profile">My Submissions</Link>
+								</li>
+								<li>
 									<Link to="/logout">Logout</Link>
 								</li>
 							</>

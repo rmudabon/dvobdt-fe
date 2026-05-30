@@ -23,8 +23,18 @@ function RouteComponent() {
 	return (
 		<QueryResolver query={query}>
 			{(location) => (
-				<div className="p-8">
+				<div className="px-8 pb-8 container mx-auto">
 					<h1 className="text-3xl font-semibold">{location.name}</h1>
+					{location.status === "PENDING" && (
+						<div className="my-6 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-yellow-800">
+							<p className="font-semibold">Pending Verification</p>
+							<p className="text-sm">
+								This location is awaiting approval and won't be visible to the
+								public until verified. Submissions are typically approved within
+								24–48 hours.
+							</p>
+						</div>
+					)}
 					{location.image_url && (
 						<img
 							src={location.image_url}
