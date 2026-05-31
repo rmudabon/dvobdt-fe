@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { fetchLocationDetail, fetchLocations } from "@/services/locations";
 
 export const useUserCoords = () => {
-	const [coords, setCoords] = useState<{ lat: number; lng: number } | undefined>();
+	const [coords, setCoords] = useState<
+		{ lat: number; lng: number } | undefined
+	>();
 	const [ready, setReady] = useState(false);
 
 	useEffect(() => {
@@ -17,7 +19,7 @@ export const useUserCoords = () => {
 		);
 	}, []);
 
-	return { coords, ready };
+	return { coords, ready, setCoords };
 };
 
 export const useLocations = (
@@ -34,7 +36,7 @@ export const useLocations = (
 		queryKey: ["locations", coords ?? null],
 		queryFn: () =>
 			fetchLocations(Object.keys(params).length ? params : undefined),
-		enabled,
+		enabled: !!coords && enabled,
 	});
 
 	return query;
