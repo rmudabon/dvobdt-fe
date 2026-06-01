@@ -74,7 +74,8 @@ function App() {
 				setAddressInput("Current Location");
 				setAddressSuggestions([]);
 			},
-			() => {
+			(error) => {
+				console.log(error);
 				toast.error(
 					"Unable to retrieve your location. Please allow location access and try again.",
 				);

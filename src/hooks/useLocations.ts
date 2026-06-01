@@ -9,14 +9,16 @@ export const useUserCoords = () => {
 	const [ready, setReady] = useState(false);
 
 	useEffect(() => {
-		navigator.geolocation.getCurrentPosition(
-			(pos) => {
-				setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-				setReady(true);
-			},
-			() => setReady(true),
-			{ timeout: 5000 },
-		);
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(
+				(pos) => {
+					setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+					setReady(true);
+				},
+				() => setReady(true),
+				{ timeout: 5000 },
+			);
+		}
 	}, []);
 
 	return { coords, ready, setCoords };
