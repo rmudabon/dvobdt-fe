@@ -85,7 +85,7 @@ function App() {
 	};
 
 	return (
-		<div className="px-8 pb-8 flex gap-8 flex-1 flex-col xl:flex-row bg-secondary">
+		<div className="px-8 pb-8 flex gap-8 flex-1 flex-col xl:flex-row">
 			<div className="flex flex-col justify-center gap-4 xl:basis-xl">
 				<div className="space-y-4">
 					<div className="space-y-4 border-b pb-4">
