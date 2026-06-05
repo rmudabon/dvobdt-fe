@@ -399,15 +399,21 @@ function LocationForm() {
 									</Field>
 								)}
 							</form.Field>
-							<div className="h-80 relative z-0">
-								<MapContainer
-									center={DAVAO_CITY_COORDS}
-									zoom={17}
-									maxBounds={BOUNDS}
-								>
-									<CustomTileLayer />
-									<LocationMarker form={form} />
-								</MapContainer>
+							<div>
+								<FieldLabel>Map</FieldLabel>
+								<p className="text-sm text-muted-foreground">
+									Click on the map to adjust the pin.
+								</p>
+								<div className="h-80 relative z-0 py-4 space-y-2">
+									<MapContainer
+										center={DAVAO_CITY_COORDS}
+										zoom={17}
+										maxBounds={BOUNDS}
+									>
+										<CustomTileLayer />
+										<LocationMarker form={form} />
+									</MapContainer>
+								</div>
 							</div>
 							<form.Field name="description">
 								{(field) => (
